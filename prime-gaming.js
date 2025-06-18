@@ -239,7 +239,8 @@ try {
             await page2.click('[type="submit"]'); // click Continue
             // console.log(await page2.locator('.warning-message').innerText()); // does not exist if there is no warning
             const r1t = await (await r1).text();
-            const reason = JSON.parse(r1t).reason;
+            const r1j = JSON.parse(r1t);
+            const reason = r1j.reason;
             // {"reason":"Invalid or no captcha"}
             // {"reason":"code_used"}
             // {"reason":"code_not_found"}
@@ -253,22 +254,25 @@ try {
               redeem_action = 'redeem (not found)';
               console.error('  Code was not found!');
             } else { // TODO not logged in? need valid unused code to test.
+              console.log('  Redeeming', r1j.products[0].title);
               redeem_action = 'redeemed?';
-              // console.log('  Redeemed successfully? Please report your Responses (if new) in https://github.com/vogler/free-games-claimer/issues/5');
-              console.debug(`  Response 1: ${r1t}`);
-              // then after the click on Redeem there is a POST request which should return {} if claimed successfully
+              // then after the click on Redeem there is a POST request which returns json
+              // POST https://redeem.gog.com/v1/bonusCodes/XYZ {productIds: ["1408290682"]}
               const r2 = page2.waitForResponse(r => r.request().method() == 'POST' && r.url().startsWith('https://redeem.gog.com/'));
               await page2.click('[type="submit"]'); // click Redeem
               const r2t = await (await r2).text();
-              const reason2 = JSON.parse(r2t).reason;
-              if (r2t == '{}') {
+              const r2j = JSON.parse(r2t);
+              // {"type":"async_processing","checkoutUrl":null}
+              if (r2j?.type == 'async_processing') {
+                await page2.locator('h1:has-text("Code redeemed successfully!")').waitFor();
                 redeem_action = 'redeemed';
                 console.log('  Redeemed successfully.');
                 db.data[user][title].status = 'claimed and redeemed';
-              } else if (reason2?.includes('captcha')) {
+              } else if (r2j?.reason2?.includes('captcha')) {
                 redeem_action = 'redeem (got captcha)';
                 console.error('  Got captcha; could not redeem!');
               } else {
+                console.debug(`  Response 1: ${r1t}`);
                 console.debug(`  Response 2: ${r2t}`);
                 console.log('  Unknown Response 2 - please report in https://github.com/vogler/free-games-claimer/issues/5');
               }

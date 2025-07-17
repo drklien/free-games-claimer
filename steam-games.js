@@ -72,7 +72,7 @@ async function claim() {
   }
 
   // Write db.data[user] to a file
-  writeFileSync(`data/${user}.json`, JSON.stringify(db.data[user], null, 2));
+  writeFileSync(`data/steam.json`, JSON.stringify(db.data[user], null, 2));
   console.log('Data written to file for user:', user);
 }
 

@@ -130,39 +130,6 @@ async function claimGamerpower(user) {
   }
 }
 
-// async function claimAgedRestrictedGame(url, user) {
-//   await page.goto(url, { waitUntil: 'domcontentloaded' });
-//   try {
-//     await page.waitForSelector('#ageDay', { timeout: 5000 });
-//     // Select a random day between 1 and 31
-//     const dayOptions = document.querySelectorAll('#ageDay option');
-//     const dayIndex = Math.floor(Math.random() * 20) + 1;
-//     await dayOptions[dayIndex].setAttribute('selected', 'true');
-
-//     // Select a random month between January and December
-//     const monthOptions = document.querySelectorAll('#ageMonth option');
-//     await page.selectOption('#ageMonth', { value: monthOptions[monthIndex] });
-
-//     // Select a year between 1900 and the current year
-//     const yearOptions = await page.$$eval('#ageYear option', options => options.map(option => option.value));
-//     const currentDate = new Date();
-//     const yearIndex = currentDate.getFullYear() - 25;
-//     await page.selectOption('#ageYear', { value: yearOptions[yearIndex] });
-
-//     await Promise.all([
-//       page.click('#view_product_page_btn'),
-//       page.waitForNavigation({ waitUntil: 'networkidle2' })
-//     ]);
-//   } catch (error) {
-//     console.error("Age gate not found or failed to handle");
-//   }
-//   try {
-//     await claimGame(url, user);
-//   } catch (error) {
-//     console.error("Failed to handle age gate or claim game:", error);
-//   }
-// }
-
 async function handleAgeGate(page, day, month, year, timeout = 30000) {
   try {
     // 1. Check if age_gate element is visible

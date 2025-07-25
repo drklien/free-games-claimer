@@ -1,3 +1,5 @@
+name: Sonar
+
 on:
   # Trigger analysis when pushing in main or pull requests, and when creating a pull request.
   push:
@@ -5,7 +7,10 @@ on:
       - main
   pull_request:
       types: [opened, synchronize, reopened]
-name: Sonar
+
+permissions:
+  contents: read
+
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
@@ -16,7 +21,7 @@ jobs:
         # Disabling shallow clone is recommended for improving relevancy of reporting. Otherwise sonarcloud will show a warning.
         fetch-depth: 0
     -
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         cache: 'npm'
     -

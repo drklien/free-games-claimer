@@ -6,10 +6,10 @@
 # free-games-claimer
 
 Claims free games periodically on
-- <img src="https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg" width="32"/> [Epic Games Store](https://www.epicgames.com/store/free-games)
-- <img src="https://seeklogo.com/images/P/prime-gaming-logo-61A701B3F5-seeklogo.com.png" width="32"/> [Amazon Prime Gaming](https://gaming.amazon.com)
-- <img src="https://static.wikia.nocookie.net/this-war-of-mine/images/1/1a/Logo_GoG.png/revision/latest?cb=20160711062658" width="32"/> [GOG](https://www.gog.com)
-- <img src="https://cdn2.unrealengine.com/ue-logo-white-e34b6ba9383f.svg" width="32"/> [Unreal Engine (Assets)](https://www.unrealengine.com/marketplace/en-US/assets?count=20&sortBy=effectiveDate&sortDir=DESC&start=0&tag=4910) ([experimental](https://github.com/vogler/free-games-claimer/issues/44), same login as Epic Games)
+- <img src="https://github.com/user-attachments/assets/82e9e9bf-b6ac-4f20-91db-36d2c8429cb6" width="32" align="middle" /> [Epic Games Store](https://www.epicgames.com/store/free-games)
+- <img src="https://github.com/user-attachments/assets/7627a108-20c6-4525-a1d8-5d221ee89d6e" width="32" align="middle" /> [Amazon Prime Gaming](https://gaming.amazon.com)
+- <img src="https://github.com/user-attachments/assets/49040b50-ee14-4439-8e3c-e93cafd7c3a5" width="32" align="middle" /> [GOG](https://www.gog.com)
+- <img src="https://github.com/user-attachments/assets/3582444b-f23b-448d-bf31-01668cd0313a" width="32" align="middle" /> [Unreal Engine (Assets)](https://www.unrealengine.com/marketplace/en-US/assets?count=20&sortBy=effectiveDate&sortDir=DESC&start=0&tag=4910) ([experimental](https://github.com/vogler/free-games-claimer/issues/44), same login as Epic Games)
 <!-- - <img src="https://www.freepnglogos.com/uploads/xbox-logo-picture-png-14.png" width="32"/> [Xbox Live Games with Gold](https://www.xbox.com/en-US/live/gold#gameswithgold) ([experimental](https://github.com/vogler/free-games-claimer/issues/19)) -->
 
 Pull requests welcome :)
@@ -21,7 +21,7 @@ _Works on Windows/macOS/Linux._
 Raspberry Pi (3, 4, Zero 2): [requires 64-bit OS](https://github.com/vogler/free-games-claimer/issues/3) like Raspberry Pi OS or Ubuntu (Raspbian won't work since it's 32-bit).
 
 ## How to run
-Easy option: [install Docker](https://docs.docker.com/get-docker/) (or [podman](https://podman-desktop.io/)) and run this command in a terminal (Windows: `cmd`, `.bat` file):
+Easy option: [install Docker](https://docs.docker.com/get-docker/) (or [podman](https://podman-desktop.io/)) and run this command in a terminal:
 ```
 docker run --rm -it -p 6080:6080 -v fgc:/fgc/data --pull=always ghcr.io/vogler/free-games-claimer
 ```
@@ -37,7 +37,7 @@ Data (including json files with claimed games, codes to redeem, screenshots) is 
 1. [Install Node.js](https://nodejs.org/en/download)
 2. Clone/download this repository and `cd` into it in a terminal
 3. Run `npm install`
-4. Run `pip install apprise` to install [apprise](https://github.com/caronc/apprise) if you want notifications
+4. Run `pip install apprise` (or use [pipx](https://github.com/pypa/pipx) if you have [problems](https://stackoverflow.com/questions/75608323/how-do-i-solve-error-externally-managed-environment-every-time-i-use-pip-3)) to install [apprise](https://github.com/caronc/apprise) if you want notifications
 5. To get updates: `git pull; npm install`
 6. Run `node epic-games`, `node prime-gaming`, `node gog`...
 
@@ -97,9 +97,9 @@ Available options/variables and their default values:
 | STEAM_JSON      | 0        	| Claims steam games from json. STEAM_JSON_URL can be defined.            |
 | STEAM_JSON_URL  | [steam-games.json](https://raw.githubusercontent.com/vogler/free-games-claimer/main/steam-games.json) | A list of steam urls in json format to claim the games. |
 | STEAM_GAMERPOWER | 0        	| Claims steam games using [gamerpower api](https://www.gamerpower.com/api/giveaways?platform=steam&type=game). |
+| LG_EMAIL        |         	| Legacy Games: email to use for redeeming (if not set, defaults to PG_EMAIL)  |
 
-
-See `config.js` for all options.
+See `src/config.js` for all options.
 
 #### How to set options
 You can add options directly in the command or put them in a file to load.
@@ -109,7 +109,7 @@ You can pass variables using `-e VAR=VAL`, for example `docker run -e EMAIL=foo@
 If you are using [docker compose](https://docs.docker.com/compose/environment-variables/) (or Portainer etc.), you can put options in the `environment:` section.
 
 ##### Without Docker
-On Linux/macOS you can prefix the variables you want to set, for example `EMAIL=foo@bar.baz SHOW=1 node epic-games` will show the browser and skip asking you for your login email.
+On Linux/macOS you can prefix the variables you want to set, for example `EMAIL=foo@bar.baz SHOW=1 node epic-games` will show the browser and skip asking you for your login email. On Windows you have to use `set`, [example](https://github.com/vogler/free-games-claimer/issues/314).
 You can also put options in `data/config.env` which will be loaded by [dotenv](https://github.com/motdotla/dotenv).
 
 ### Notifications
@@ -162,7 +162,7 @@ If you want it to run regularly, you have to schedule the runs yourself:
 
 - Linux/macOS: `crontab -e` ([example](https://github.com/vogler/free-games-claimer/discussions/56))
 - macOS: [launchd](https://stackoverflow.com/questions/132955/how-do-i-set-a-task-to-run-every-so-often)
-- Windows: [task scheduler](https://active-directory-wp.com/docs/Usage/How_to_add_a_cron_job_on_Windows/Scheduled_tasks_and_cron_jobs_on_Windows/index.html), [other options](https://stackoverflow.com/questions/132971/what-is-the-windows-version-of-cron)
+- Windows: [task scheduler](https://active-directory-wp.com/docs/Usage/How_to_add_a_cron_job_on_Windows/Scheduled_tasks_and_cron_jobs_on_Windows/index.html) ([example](https://github.com/vogler/free-games-claimer/wiki/%5BHowTo%5D-Schedule-runs-on-Windows)), [other options](https://stackoverflow.com/questions/132971/what-is-the-windows-version-of-cron), or just put the command in a `.bat` file in Autostart if you restart often...
 - any OS: use a process manager like [pm2](https://pm2.keymetrics.io/docs/usage/restart-strategies/)
 - Docker Compose `command: bash -c "node epic-games; node prime-gaming; node gog; echo sleeping; sleep 1d"` additionally add `restart: unless-stopped` to it.
 
@@ -218,6 +218,9 @@ Added notifications via [apprise](https://github.com/caronc/apprise).
 </details>
 
 [![Star History Chart](https://api.star-history.com/svg?repos=vogler/free-games-claimer&type=Date)](https://star-history.com/#vogler/free-games-claimer&Date)
+<!-- [![Stargazers over time](https://starchart.cc/vogler/free-games-claimer.svg?variant=adaptive)](https://starchart.cc/vogler/free-games-claimer) -->
+
+![Alt](https://repobeats.axiom.co/api/embed/a1c5e6e420d90e0d6b34c1285e92a69a44138faa.svg "Repobeats analytics image")
 
 ---
 

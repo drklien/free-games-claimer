@@ -6,6 +6,7 @@ dotenv.config({ path: 'data/config.env' }); // loads env vars from file - will n
 // Options - also see table in README.md
 export const cfg = {
   debug: process.env.DEBUG == '1' || process.env.PWDEBUG == '1', // runs non-headless and opens https://playwright.dev/docs/inspector
+  debug_network: process.env.DEBUG_NETWORK == '1', // log network requests and responses
   record: process.env.RECORD == '1', // `recordHar` (network) + `recordVideo`
   time: process.env.TIME == '1', // log duration of each step
   dryrun: process.env.DRYRUN == '1', // don't claim anything
@@ -55,5 +56,13 @@ export const cfg = {
   steam_json_url: process.env.STEAM_JSON_URL || 'https://raw.githubusercontent.com/vogler/free-games-claimer/main/steam-games.json',
   steam_gamerpower: true,
   steam_gamerpower_url: process.env.STEAM_GAMERPOWER_URL || 'https://www.gamerpower.com/api/giveaways?platform=steam&type=game',
-
+  // auth AliExpress
+  ae_email: process.env.AE_EMAIL || process.env.EMAIL,
+  ae_password: process.env.AE_PASSWORD || process.env.PASSWORD,
+  // OTP only via GOG_EMAIL, can't add app...
+  // experimmental
+  pg_redeem: process.env.PG_REDEEM == '1', // prime-gaming: redeem keys on external stores
+  lg_email: process.env.LG_EMAIL || process.env.PG_EMAIL || process.env.EMAIL, // prime-gaming: external: legacy-games: email to use for redeeming
+  pg_claimdlc: process.env.PG_CLAIMDLC == '1', // prime-gaming: claim in-game content
+  pg_timeLeft: Number(process.env.PG_TIMELEFT), // prime-gaming: check time left to claim and skip game if there are more than PG_TIMELEFT days left to claim it
 };

@@ -5,14 +5,14 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // explicit object instead of Object.fromEntries since the built-in type would loose the keys, better type: https://dev.to/svehla/typescript-object-fromentries-389c
-export const dataDir = s => path.resolve(__dirname, 'data', s);
+export const dataDir = s => path.resolve(__dirname, '..', 'data', s);
 
 // modified path.resolve to return null if first argument is '0', used to disable screenshots
 export const resolve = (...a) => a.length && a[0] == '0' ? null : path.resolve(...a);
 
 // json database
-import { JSONPreset } from 'lowdb/node';
-export const jsonDb = (file, defaultData) => JSONPreset(dataDir(file), defaultData);
+import { JSONFilePreset } from 'lowdb/node';
+export const jsonDb = (file, defaultData) => JSONFilePreset(dataDir(file), defaultData);
 
 export const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 // date and time as UTC (no timezone offset) in nicely readable and sortable format, e.g., 2022-10-06 12:05:27.313
@@ -26,6 +26,28 @@ export const handleSIGINT = (context = null) => process.on('SIGINT', async () =>
   process.exitCode = 130; // 128+SIGINT to indicate to parent that process was killed
   if (context) await context.close(); // in order to save recordings also on SIGINT, we need to disable Playwright's handleSIGINT and close the context ourselves
 });
+
+export const launchChromium = async options => {
+  const { chromium } = await import('playwright-chromium'); // stealth plugin needs no outdated playwright-extra
+
+  // https://www.nopecha.com extension source from https://github.com/NopeCHA/NopeCHA/releases/tag/0.1.16
+  // const ext = path.resolve('nopecha'); // used in Chromium, currently not needed in Firefox
+
+  const context = chromium.launchPersistentContext(cfg.dir.browser, {
+    // chrome will not work in linux arm64, only chromium
+    // channel: 'chrome', // https://playwright.dev/docs/browsers#google-chrome--microsoft-edge
+    args: [ // https://peter.sh/experiments/chromium-command-line-switches
+      // don't want to see bubble 'Restore pages? Chrome didn't shut down correctly.'
+      // '--restore-last-session', // does not apply for crash/killed
+      '--hide-crash-restore-bubble',
+      // `--disable-extensions-except=${ext}`,
+      // `--load-extension=${ext}`,
+    ],
+    // ignoreDefaultArgs: ['--enable-automation'], // remove default arg that shows the info bar with 'Chrome is being controlled by automated test software.'. Since Chromeium 106 this leads to show another info bar with 'You are using an unsupported command-line flag: --no-sandbox. Stability and security will suffer.'.
+    ...options,
+  });
+  return context;
+};
 
 export const stealth = async context => {
   // stealth with playwright: https://github.com/berstend/puppeteer-extra/issues/454#issuecomment-917437212
@@ -59,7 +81,7 @@ export const stealth = async context => {
     const evasion = await import(`puppeteer-extra-plugin-stealth/evasions/${e}/index.js`);
     evasion.default().onPageCreated(stealth);
   }
-  for (let evasion of stealth.callbacks) {
+  for (const evasion of stealth.callbacks) {
     await context.addInitScript(evasion.cb, evasion.a);
   }
 };
@@ -94,7 +116,7 @@ export const notify = html => new Promise((resolve, reject) => {
     return resolve();
   }
   // const cmd = `apprise '${cfg.notify}' ${title} -i html -b '${html}'`; // this had problems if e.g. ' was used in arg; could have `npm i shell-escape`, but instead using safer execFile which takes args as array instead of exec which spawned a shell to execute the command
-  const args = [cfg.notify, '-i', 'html', '-b', html];
+  const args = [cfg.notify, '-i', 'html', '-b', `'${html}'`];
   if (cfg.notify_title) args.push(...['-t', cfg.notify_title]);
   if (cfg.debug) console.debug(`apprise ${args.map(a => `'${a}'`).join(' ')}`); // this also doesn't escape, but it's just for info
   execFile('apprise', args, (error, stdout, stderr) => {
